@@ -5,7 +5,15 @@ using namespace std;
 
 int main()
 {
-	IntegerArray arr(5);
+	try 
+	{
+		IntegerArray arr();
+	}
+	catch (const char* e)
+	{
+		cout << e << endl;
+	}
+	
 
 	return 0;
 }
