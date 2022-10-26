@@ -194,7 +194,7 @@ const int IntegerArray::search(int value) noexcept
 		}
 	}
 
-	return -1;// -1 - значение не найдено
+	return -1;// "-1" - not found
 }
 
 int& IntegerArray::operator[](int index)

@@ -3,8 +3,8 @@
 #include <exception>
 using namespace std;
 
-void test(); //Just test. Delete
-void print(IntegerArray& ia); //Just for test. Delete
+void test();
+void print(IntegerArray& ia);
 
 int main()
 {
@@ -13,7 +13,6 @@ int main()
 	return 0;
 }
 
-//Delete everything below after the tests
 void test()
 {
 	{
