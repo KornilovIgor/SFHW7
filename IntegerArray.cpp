@@ -1,13 +1,24 @@
 #include "IntegerArray.h"
+
 IntegerArray::IntegerArray(int length) : _length(length)
 {
 	if (length < 0)
 	{
-		throw "Array size is less than zero";
+		throw bad_length("Error: Length of array is less than zero.", length);
 	}
-	else
+
+	_data = new int[length] {};
+}
+
+IntegerArray::IntegerArray(const IntegerArray& integerArray)
+{
+	_length = integerArray._length;
+
+	_data = new int[_length] {};
+
+	for (int i = 0; i < _length; ++i)
 	{
-		_data = new int[length] {};
+		_data[i] = integerArray._data[i];
 	}
 }
 
@@ -16,7 +27,12 @@ IntegerArray::~IntegerArray()
 	delete[] _data;
 }
 
-void IntegerArray::erase()
+int IntegerArray::getLength() const noexcept
+{
+	return _length;
+}
+
+void IntegerArray::erase() noexcept
 {
 	delete[] _data;
 	_data = nullptr;
@@ -25,12 +41,12 @@ void IntegerArray::erase()
 
 void IntegerArray::reallocate(int newLength)
 {
-	erase();
-
-	if (newLength <= 0)
+	if (newLength < 0)
 	{
-		return;
+		throw bad_length("Error: Length of array is less than zero.", newLength);
 	}
+
+	erase();
 
 	_length = newLength;
 	_data = new int[_length];
@@ -42,12 +58,16 @@ void IntegerArray::resize(int newLength)
 	{
 		return;
 	}
-	else if (newLength <= 0)
+	else if (newLength == 0)
 	{
 		erase();
 		return;
 	}
-
+	else if (newLength < 0)
+	{
+		throw bad_length("Error: Length of array is less than zero.", newLength);
+	}
+	
 	int* data =	new int[newLength];
 
 	if (_length > 0)
@@ -67,11 +87,146 @@ void IntegerArray::resize(int newLength)
 
 }
 
+void IntegerArray::insertBefore(int value, int index)
+{
+	if (index < 0 || index >= _length)
+	{
+		throw bad_range("Error: Index out of range", _length, index);
+	}
+
+	int* data = new int[_length + 1];
+
+	for (int beforeIndex = 0; beforeIndex < index; ++beforeIndex)
+	{
+		data[beforeIndex] = _data[beforeIndex];
+	}
+	data[index] = value;
+	for (int afterIndex = index; afterIndex < _length; ++afterIndex)
+	{
+		data[afterIndex + 1] = _data[afterIndex];
+	}
+
+	delete[] _data;
+	_data = data;
+	++_length;
+}
+
+void IntegerArray::insertBeforeFirst(int value) noexcept
+{
+	int* data = new int[_length + 1];
+
+	data[0] = value;
+	for (int i = 0; i < _length; ++i)
+	{
+		data[i + 1] = _data[i];
+	}
+
+	delete[] _data;
+	_data = data;
+	++_length;
+}
+
+void IntegerArray::insertAfterLast(int value) noexcept
+{
+	int* data = new int[_length + 1];
+
+	for (int i = 0; i < _length; ++i)
+	{
+		data[i] = _data[i];
+	}
+	data[_length] = value;
+
+	delete[] _data;
+	_data = data;
+	++_length;
+}
+
+void IntegerArray::remove(int index)
+{
+	if (index < 0 || index >= _length)
+	{
+		throw bad_range("Error: Index out of range", _length, index);
+	}
+
+	if (_length == 1)
+	{
+		erase();
+		return;
+	}
+
+	int* data = new int[_length - 1];
+
+	for (int beforeIndex = 0; beforeIndex < index; ++beforeIndex)
+	{
+		data[beforeIndex] = _data[beforeIndex];
+	}
+	for (int afterIndex = index + 1; afterIndex < _length; ++afterIndex)
+	{
+		data[afterIndex - 1] = _data[afterIndex];
+	}
+
+	delete[] _data;
+	_data = data;
+	--_length;
+}
+
+void IntegerArray::copy(const IntegerArray& integerArray) noexcept
+{
+	erase();
+
+	_length = integerArray._length;
+
+	_data = new int[_length] {};
+
+	for (int i = 0; i < _length; ++i)
+	{
+		_data[i] = integerArray._data[i];
+	}
+}
+
+const int IntegerArray::search(int value) noexcept
+{
+	for (int i = 0; i < _length; ++i)
+	{
+		if (_data[i] == value)
+		{
+			return i;
+		}
+	}
+
+	return -1;// -1 - значение не найдено
+}
+
 int& IntegerArray::operator[](int index)
 {
 	if (index < 0 || index >= _length)
 	{
-		throw "Invalid index";
+		throw bad_range("Error: Index out of range", _length, index);
 	}
 	return _data[index];
+}
+
+bad_range::bad_range(const char* msg, int length, int index) :
+	exception(msg), _length(length), _index(index)
+	{
+	}
+
+int bad_range::getLength() const noexcept
+{
+	return _length;
+}
+
+int bad_range::getIndex() const noexcept
+{
+	return _index;
+}
+
+bad_length::bad_length(const char* msg, int length):
+	exception(msg), _length(length)
+{
+}
+
+int bad_length::getLength() const noexcept
+{
+	return _length;
 }
