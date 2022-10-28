@@ -32,9 +32,6 @@ private:
 	int* _data = 0;
 
 public:
-	void throwBadRange(int index);
-	void throwBadLength(int length);
-
 	IntegerArray() = default;
 	IntegerArray(int length);
 	IntegerArray(const IntegerArray& integerArray);
@@ -49,8 +46,9 @@ public:
 	void insertBeforeFirst(int value) noexcept;
 	void insertAfterLast(int value) noexcept;
 	void remove(int index);
-	void copy(const IntegerArray& integerArray) noexcept;
+	void copy(const IntegerArray& integerArray);
 	const int search(int value) noexcept;
 
 	int& operator[](int index);
+	IntegerArray& operator=(const IntegerArray& integerArray);
 };

@@ -7,7 +7,11 @@ IntegerArray::IntegerArray(int length) : _length(length)
 		throw bad_length("Error: Length of array is less than zero.", length);
 	}
 
-	_data = new int[length] {};
+	_data = new int[length];
+	for (size_t i = 0; i < length; ++i)
+	{
+		_data[i] = 0;
+	}
 }
 
 IntegerArray::IntegerArray(const IntegerArray& integerArray)
@@ -16,7 +20,7 @@ IntegerArray::IntegerArray(const IntegerArray& integerArray)
 
 	_data = new int[_length] {};
 
-	for (int i = 0; i < _length; ++i)
+	for (size_t i = 0; i < _length; ++i)
 	{
 		_data[i] = integerArray._data[i];
 	}
@@ -54,7 +58,7 @@ void IntegerArray::reallocate(int newLength)
 
 void IntegerArray::resize(int newLength)
 {
-	if (newLength = _length)
+	if (newLength == _length)
 	{
 		return;
 	}
@@ -67,6 +71,11 @@ void IntegerArray::resize(int newLength)
 	{
 		throw bad_length("Error: Length of array is less than zero.", newLength);
 	}
+	else if (newLength < _length)
+	{
+		_length = newLength;
+		return;
+	}
 	
 	int* data =	new int[newLength];
 
@@ -74,7 +83,7 @@ void IntegerArray::resize(int newLength)
 	{
 		int elementsToCopy = { newLength > _length ? _length : newLength };
 
-		for (int i = 0; i < elementsToCopy; ++i)
+		for (size_t i = 0; i < elementsToCopy; ++i)
 		{
 			data[i] = _data[i];
 		}
@@ -84,7 +93,6 @@ void IntegerArray::resize(int newLength)
 
 	_data = data;
 	_length = newLength;
-
 }
 
 void IntegerArray::insertBefore(int value, int index)
@@ -96,12 +104,12 @@ void IntegerArray::insertBefore(int value, int index)
 
 	int* data = new int[_length + 1];
 
-	for (int beforeIndex = 0; beforeIndex < index; ++beforeIndex)
+	for (size_t beforeIndex = 0; beforeIndex < index; ++beforeIndex)
 	{
 		data[beforeIndex] = _data[beforeIndex];
 	}
 	data[index] = value;
-	for (int afterIndex = index; afterIndex < _length; ++afterIndex)
+	for (size_t afterIndex = index; afterIndex < _length; ++afterIndex)
 	{
 		data[afterIndex + 1] = _data[afterIndex];
 	}
@@ -116,7 +124,7 @@ void IntegerArray::insertBeforeFirst(int value) noexcept
 	int* data = new int[_length + 1];
 
 	data[0] = value;
-	for (int i = 0; i < _length; ++i)
+	for (size_t i = 0; i < _length; ++i)
 	{
 		data[i + 1] = _data[i];
 	}
@@ -130,7 +138,7 @@ void IntegerArray::insertAfterLast(int value) noexcept
 {
 	int* data = new int[_length + 1];
 
-	for (int i = 0; i < _length; ++i)
+	for (size_t i = 0; i < _length; ++i)
 	{
 		data[i] = _data[i];
 	}
@@ -156,11 +164,11 @@ void IntegerArray::remove(int index)
 
 	int* data = new int[_length - 1];
 
-	for (int beforeIndex = 0; beforeIndex < index; ++beforeIndex)
+	for (size_t beforeIndex = 0; beforeIndex < index; ++beforeIndex)
 	{
 		data[beforeIndex] = _data[beforeIndex];
 	}
-	for (int afterIndex = index + 1; afterIndex < _length; ++afterIndex)
+	for (size_t afterIndex = index + 1; afterIndex < _length; ++afterIndex)
 	{
 		data[afterIndex - 1] = _data[afterIndex];
 	}
@@ -170,15 +178,22 @@ void IntegerArray::remove(int index)
 	--_length;
 }
 
-void IntegerArray::copy(const IntegerArray& integerArray) noexcept
+void IntegerArray::copy(const IntegerArray& integerArray)
 {
 	erase();
 
 	_length = integerArray._length;
 
-	_data = new int[_length] {};
+	try 
+	{
+		_data = new int[_length];
+	}
+	catch (std::bad_alloc& ba)
+	{
+		throw ba;
+	}
 
-	for (int i = 0; i < _length; ++i)
+	for (size_t i = 0; i < _length; ++i)
 	{
 		_data[i] = integerArray._data[i];
 	}
@@ -186,7 +201,7 @@ void IntegerArray::copy(const IntegerArray& integerArray) noexcept
 
 const int IntegerArray::search(int value) noexcept
 {
-	for (int i = 0; i < _length; ++i)
+	for (size_t i = 0; i < _length; ++i)
 	{
 		if (_data[i] == value)
 		{
@@ -194,7 +209,7 @@ const int IntegerArray::search(int value) noexcept
 		}
 	}
 
-	return -1;// "-1" - not found
+	return -1;// value - not found
 }
 
 int& IntegerArray::operator[](int index)
@@ -204,6 +219,20 @@ int& IntegerArray::operator[](int index)
 		throw bad_range("Error: Index out of range", _length, index);
 	}
 	return _data[index];
+}
+
+IntegerArray& IntegerArray::operator=(const IntegerArray& integerArray)
+{
+	_length = integerArray._length;
+
+	_data = new int[_length] {};
+
+	for (size_t i = 0; i < _length; ++i)
+	{
+		_data[i] = integerArray._data[i];
+	}
+
+	return *this;
 }
 
 bad_range::bad_range(const char* msg, int length, int index) :
